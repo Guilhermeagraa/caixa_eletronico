@@ -1,64 +1,81 @@
-menu = """
-[d] Depositar
-[s] Sacar
-[e] Extrato
-[q] Sair
+# caixa_eletronico.py
+from datetime import datetime
 
-=> """
-saldo = 0
-limite = 500
-extrato = ""
-numero_saque = 0
-LIMITE_SAQUES = 3
+LIMITE_SAQUE = 500  # limite diário por saque
 
-while True:
-    opcao = input(menu).lower()
+def depositar(saldo, extrato):
+    while True:
+        try:
+            valor = float(input("Digite o valor para depósito e 0 para cancelar: "))
+            if valor < 0:
+                print("Valor inválido! Informe um valor maior que 0.")
+            elif valor == 0:
+                print("Depósito cancelado.")
+                break
+            else:
+                saldo += valor
+                extrato.append(f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} - Depósito: R$ {valor:.2f}")
+                print(f"Depósito de R$ {valor:.2f} realizado com sucesso!")
+                break
+        except ValueError:
+            print("Valor inválido! Informe apenas números.")
+    return saldo
 
-    if opcao == "d":
-        print("=== Depósito ===")
-        valor = float(input("Informe o valor do depósito: "))
+def sacar(saldo, extrato):
+    while True:
+        try:
+            valor = float(input("Digite o valor para saque e 0 para cancelar: "))
+            if valor < 0:
+                print("Valor inválido! Informe um valor maior que 0.")
+            elif valor == 0:
+                print("Saque cancelado.")
+                break
+            elif valor > saldo:
+                print("Saldo insuficiente!")
+            elif valor > LIMITE_SAQUE:
+                print(f"Limite de saque diário é R$ {LIMITE_SAQUE:.2f}")
+            else:
+                saldo -= valor
+                extrato.append(f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} - Saque: R$ {valor:.2f}")
+                print(f"Saque de R$ {valor:.2f} realizado com sucesso!")
+                break
+        except ValueError:
+            print("Valor inválido! Informe apenas números.")
+    return saldo
 
-        if valor > 0:
-            saldo += valor
-            extrato += f"Depósito: R$ {valor:.2f}\n"
-            print(f"Depósito de R$ {valor:.2f} realizado com sucesso!")
-        else:
-            print("Valor inválido! O depósito deve ser maior que zero.")
-
-    elif opcao == "s":
-        print("=== Saque ===")
-        valor = float(input("Informe o valor do saque: "))
-
-        excedeu_saldo = valor > saldo
-        excedeu_limite = valor > limite
-        excedeu_saque = numero_saque >= LIMITE_SAQUES
-
-        if valor <= 0:
-            print("Operação falhou, o valor informado é inválido.")
-        elif excedeu_saldo:
-            print("Operação falhou, saldo insuficiente.")
-        elif excedeu_limite:
-            print("Operação falhou, o valor do saque excede o limite.")
-        elif excedeu_saque:
-            print("Operação falhou, número de saques diário excedido.")
-        else:
-            saldo -= valor
-            extrato += f"Saque: R$ {valor:.2f}\n"
-            numero_saque += 1
-            print(f"Saque de R$ {valor:.2f} realizado com sucesso!")
-
-    elif opcao == "e":
-        print("\n========== EXTRATO ==========")
-        if not extrato:
-            print("Não foram realizadas movimentações.")
-        else:
-            print(extrato)
-        print(f"Saldo: R$ {saldo:.2f}")
-        print("==============================")
-
-    elif opcao == "q":
-        print("Encerrando o sistema. Até logo!")
-        break
-
+def mostrar_extrato(extrato, saldo):
+    print("\n===== EXTRATO =====")
+    if not extrato:
+        print("Nenhuma movimentação realizada.")
     else:
-        print("Operação inválida, selecione novamente a opção desejada.")
+        for movimento in extrato:
+            print(movimento)
+    print(f"Saldo atual: R$ {saldo:.2f}")
+    print("==================\n")
+
+def menu():
+    saldo = 0
+    extrato = []
+
+    while True:
+        print("=== CAIXA ELETRÔNICO ===")
+        print("[1] Depositar")
+        print("[2] Sacar")
+        print("[3] Extrato")
+        print("[0] Sair")
+        opcao = input("Escolha uma opção: ")
+
+        if opcao == "1":
+            saldo = depositar(saldo, extrato)
+        elif opcao == "2":
+            saldo = sacar(saldo, extrato)
+        elif opcao == "3":
+            mostrar_extrato(extrato, saldo)
+        elif opcao == "0":
+            print("Obrigado por usar o Caixa Eletrônico!")
+            break
+        else:
+            print("Opção inválida! Tente novamente.")
+
+if __name__ == "__main__":
+    menu()
